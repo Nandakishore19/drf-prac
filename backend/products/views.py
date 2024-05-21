@@ -1,34 +1,45 @@
-from django.shortcuts import render
-from rest_framework import generics, mixins, permissions, authentication
+from rest_framework import generics, mixins
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from django.shortcuts import get_object_or_404
+from api.mixins import StaffEditorPermissionMixin, UserQuerySetMixin
 from .models import Product
 from .serializers import ProductSerializer
-from rest_framework.response import Response
-from rest_framework.decorators import api_view
-
-from django.shortcuts import get_object_or_404
 
 
 # Create your views here.
-class ProductListCreateAPIView(generics.ListCreateAPIView):
+class ProductListCreateAPIView(
+    UserQuerySetMixin, StaffEditorPermissionMixin, generics.ListCreateAPIView
+):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
-    authentication_classes = [authentication.SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
     def perform_create(self, serializer):
         # serializer.save(user=self.request.user)
+        # email = serializer.validated_data.pop("email")
         title = serializer.validated_data.get("title")
-        content = serializer.validated_data.get("content")
+        content = serializer.validated_data.get("content") or None
         if content is None:
             content = title
         # print(serializer.validated_data)
-        serializer.save(content=content)
+        serializer.save(user=self.request.user, content=content)
+
+    # def get_queryset(self, *args, **kwargs):  #This similar functionality is written through UserQuerySetMixin
+    #     qs = super().get_queryset(*args, **kwargs)
+    #     request = self.request
+    #     user = request.user
+    #     if not user.is_authenticated:
+    #         return Product.objects.none()
+    #     # print(request.user)
+    #     return qs.filter(user=request.user)
 
 
 product_list_create_view = ProductListCreateAPIView.as_view()
 
 
-class ProductDetailAPIView(generics.RetrieveAPIView):
+class ProductDetailAPIView(
+    UserQuerySetMixin, StaffEditorPermissionMixin, generics.RetrieveAPIView
+):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     # lookup_field = 'pk'
@@ -37,7 +48,9 @@ class ProductDetailAPIView(generics.RetrieveAPIView):
 product_detail_view = ProductDetailAPIView.as_view()
 
 
-class ProductUpdateAPIView(generics.UpdateAPIView):
+class ProductUpdateAPIView(
+    UserQuerySetMixin, StaffEditorPermissionMixin, generics.UpdateAPIView
+):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     lookup_field = "pk"
@@ -46,12 +59,15 @@ class ProductUpdateAPIView(generics.UpdateAPIView):
         instance = serializer.save()
         if not instance.content:
             instance.content = instance.title
+        instance.save()
 
 
 product_update_view = ProductUpdateAPIView.as_view()
 
 
-class ProductDestroyAPIView(generics.DestroyAPIView):
+class ProductDestroyAPIView(
+    UserQuerySetMixin, StaffEditorPermissionMixin, generics.DestroyAPIView
+):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     lookup_field = "pk"
