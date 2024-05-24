@@ -15,10 +15,6 @@ class ProductInLineSerializer(serializers.Serializer):
 class ProductSerializer(serializers.ModelSerializer): # If we are performing create and update, then it is good to use ModelSerializer
     owner = UserPublicSerializer(source="user", read_only=True)
     discount = serializers.SerializerMethodField(read_only=True)
-    edit_url = serializers.SerializerMethodField(read_only=True)
-    url = serializers.HyperlinkedIdentityField(
-        view_name="product-detail", lookup_field="pk"
-    )
     # email = serializers.EmailField(write_only=True)
     title = serializers.CharField(
         validators=[validate_title_no_hello, unique_product_title]
@@ -30,14 +26,15 @@ class ProductSerializer(serializers.ModelSerializer): # If we are performing cre
         model = Product
         fields = [
             "owner",
-            "url",
-            "edit_url",
             "pk",
             "title",
             "content",
             "price",
             "sale_price",
             "discount",
+            'public',
+            'path',
+            'endpoint',
         ]
 
     # We might be having to use custom validations within this serializer class in situations where we will be needing the request

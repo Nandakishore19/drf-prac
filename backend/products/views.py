@@ -12,8 +12,8 @@ class ProductListCreateAPIView(
     UserQuerySetMixin, StaffEditorPermissionMixin, generics.ListCreateAPIView
 ):
     queryset = Product.objects.all()
-    serializer_class = ProductSerializer
-
+    serializer_class = ProductSerializer #Must set this attribute, else ovverride the get_attribute_class() method
+    # pagination_class = None
     def perform_create(self, serializer):
         # serializer.save(user=self.request.user)
         # email = serializer.validated_data.pop("email")
@@ -23,7 +23,7 @@ class ProductListCreateAPIView(
             content = title
         # print(serializer.validated_data)
         serializer.save(user=self.request.user, content=content)
-
+        
     # def get_queryset(self, *args, **kwargs):  #This similar functionality is written through UserQuerySetMixin
     #     qs = super().get_queryset(*args, **kwargs)
     #     request = self.request
@@ -150,3 +150,13 @@ class ProductMixinView(
 
 
 product_mixin_view = ProductMixinView.as_view()
+
+
+class PostAuthToken(generics.CreateAPIView):
+    serializer_class = ProductSerializer
+
+    class meta:
+        pass
+    
+    def get_queryset(self):
+        return None
