@@ -29,4 +29,3 @@ class IsStaffEditorPermission(permissions.DjangoModelPermissions):
     #             return True
     #         return False
     #     return False
-        

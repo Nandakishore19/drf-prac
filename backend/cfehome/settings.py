@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/4.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
-
+import datetime
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -37,16 +37,24 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    #internal apps
     'api',
     'products',
     'search',
+    'articles',
+    #Third party packages
     'rest_framework',
     'rest_framework.authtoken',
+    'rest_framework_simplejwt',
+    'corsheaders',
+    #Third party api services
+    'algoliasearch_django',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -55,6 +63,13 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'cfehome.urls'
+CORS_URLS_REGEX = r"^/api/.*"
+CORS_ALLOWED_ORIGINS = []
+if DEBUG:
+    CORS_ALLOWED_ORIGINS = [
+        'http://127.0.0.1:8111',
+        'https://127.0.0.1:8111',
+    ]
 
 TEMPLATES = [
     {
@@ -129,11 +144,25 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         "rest_framework.authentication.SessionAuthentication",
-        "api.authentication.TokenAuthentication"
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+                "api.authentication.TokenAuthentication",
+
     ],
     'DEFAULT_PERMISSION_CLASSES' : [
     "rest_framework.permissions.IsAuthenticatedOrReadOnly",   
       ],
       'DEFAULT_PAGINATION_CLASS': "rest_framework.pagination.LimitOffsetPagination",
       "PAGE_SIZE":10
+}
+
+ALGOLIA = {
+    'APPLICATION_ID': 'J6MI12COG9',
+    'API_KEY': '4b594d66a7e16d76e5a84244189258f8',
+    'INDEX_PREFIX':'cfe'
+}
+
+SIMPLE_JWT = {
+    "AUTH_HEADER_TYPES":['Bearer'],
+    "ACCESS_TOKEN_LIFETIME":datetime.timedelta(seconds=30),
+    "REFRESH_TOKEN_LIFETIME":datetime.timedelta(minutes=1),
 }

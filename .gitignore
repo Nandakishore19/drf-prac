@@ -1,1 +1,7 @@
 rest_env
+djangorest.code-workspace
+
+.env
+backend/cfehome/settings.py
+js_client/
+creds.json
